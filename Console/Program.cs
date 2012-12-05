@@ -1,25 +1,28 @@
-﻿using System.Data.SQLite;
+﻿using System.Configuration;
+using System.Data.Common;
+using System.Data.SQLite;
+using System.Linq;
+using Console.EntityConfiguration;
 
 namespace Console
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            const string connString = "Data Source=db\\database.sqlite";
+            const string connectionString = @"Provider=System.Data.SQLite;data source=db\database.sqlite";
 
-            using (var conn = new SQLiteConnection(connString))
+            using (var conn = new SQLiteConnection(connectionString))
             {
-                using (var cmd = new SQLiteCommand("SELECT * FROM CUSTOMER", conn))
-                {
-                    conn.Open();
+//                conn.Open();
 
-                    using (var dr = cmd.ExecuteReader())
+                using (var context = new EntityContext(connectionString))
+                {
+                    var customers = context.Customers.ToList();
+
+                    foreach (var customer in customers)
                     {
-                        while (dr.Read())
-                        {
-                            System.Console.WriteLine(dr.GetValue(0) + " " + dr.GetValue(1));
-                        }
+                        System.Console.WriteLine("Customer (Id: {0}, Name:{1}", customer.Id, customer.Name);
                     }
                 }
             }
